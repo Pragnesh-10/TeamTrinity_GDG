@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+torch
+torchvision
+faiss-cpu
+firebase-admin
+python-multipart
+pydantic
+Pillow
+numpy
