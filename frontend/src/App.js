@@ -12,7 +12,7 @@ function App() {
       <div className="App min-h-screen bg-gray-50 text-gray-800 font-sans">
         <header className="bg-blue-900 text-white shadow-md">
           <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold tracking-tight">AI Digital Fingerprint <span className="text-blue-300">| Sports Media</span></h1>
+            <h1 className="text-2xl font-bold tracking-tight">FairPlay AI <span className="text-blue-300">| Sports Context Engine</span></h1>
             <nav className="space-x-6 text-sm font-medium flex">
               <Link to="/upload" className="hover:text-blue-300 transition-colors">Register Asset</Link>
               <Link to="/images" className="hover:text-blue-300 transition-colors">Protected Assets</Link>

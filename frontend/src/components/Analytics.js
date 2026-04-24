@@ -15,7 +15,10 @@ const Analytics = () => {
           location: d.location || 'Unknown Network Node',
           timestamp: d.detectedAt ? new Date(d.detectedAt).toLocaleString() : 'Just now',
           similarity: (d.similarity * 100).toFixed(2),
-          threatLevel: d.threatLevel || 'Medium'
+          threatLevel: d.threatLevel || 'Medium',
+          category: d.category || 'Piracy',
+          reasoning: d.reasoning || '',
+          isFairUse: d.status === 'safe'
         }));
         setAnomalies(apiData);
       } catch (error) {
@@ -63,19 +66,24 @@ const Analytics = () => {
         </div>
         <div className="divide-y divide-gray-100">
           {anomalies.map((anom) => (
-            <div key={anom.id} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors bg-white">
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-full ${anom.threatLevel === 'Critical' ? 'bg-red-100 text-red-600' : anom.threatLevel === 'High' ? 'bg-orange-100 text-orange-600' : 'bg-yellow-100 text-yellow-600'}`}>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <div key={anom.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between hover:bg-gray-50 transition-colors bg-white">
+              <div className="flex items-center space-x-4 mb-4 md:mb-0">
+                <div className={`p-3 rounded-full ${anom.isFairUse ? 'bg-green-100 text-green-600' : (anom.threatLevel === 'Critical' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600')}`}>
+                  {anom.isFairUse ? (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  ) : (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                  )}
                 </div>
                 <div>
-                  <p className="font-bold text-gray-900">{anom.location}</p>
+                  <p className="font-bold text-gray-900">{anom.location} <span className={`text-xs ml-2 px-2 py-0.5 rounded uppercase ${anom.isFairUse ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{anom.category}</span></p>
                   <p className="text-sm text-gray-500">Asset Ref: <span className="font-mono text-xs">{anom.assetId}</span> • Detected {anom.timestamp}</p>
+                  {anom.reasoning && <p className="text-xs text-gray-400 mt-1 italic mt-1 max-w-lg truncate">"{anom.reasoning}"</p>}
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-black text-gray-800">{anom.similarity}% Match</p>
-                <button className="mt-1 text-sm font-bold text-red-600 hover:text-red-800 transition-colors">Review Case ➔</button>
+              <div className="text-left md:text-right">
+                <p className="font-black text-gray-800">{anom.similarity}% Vector Match</p>
+                <button className={`mt-1 text-sm font-bold transition-colors ${anom.isFairUse ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}>Review Case ➔</button>
               </div>
             </div>
           ))}

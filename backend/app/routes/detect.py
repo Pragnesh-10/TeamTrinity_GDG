@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request, Form
 from app.models.embedding import EmbeddingGenerator
 from app.services.faiss_service import faiss_service
 from app.services.firebase_service import get_image_by_id
@@ -33,6 +33,8 @@ async def get_detections(request: Request):
 async def detect(
     request: Request,
     file: UploadFile = File(...),
+    transcript: str = Form(None),
+    visual_context: str = Form(None),
     current_user: dict = Depends(get_current_user) # Authentication enforced
 ):
     # Security Validation: Content type 
@@ -60,6 +62,19 @@ async def detect(
         # Below permits the detector to find any match, fulfilling the IP Tracking requirements.
         matched_url = matched_data['url'] if matched_data else None
         
+        # Unbiased Agent Context Analysis
+        category = "Piracy"
+        reasoning = "No transformative elements found. 1:1 raw feed upload."
+        is_fair_use = False
+        
+        # If context is provided, analyze for 'Fair Use' transformation
+        if transcript or visual_context:
+            context_string = f"{transcript or ''} {visual_context or ''}".lower()
+            if any(term in context_string for term in ["analysis", "tactics", "breakdown", "overlay", "commentary", "educational", "review"]):
+                category = "Fair Use"
+                is_fair_use = True
+                reasoning = "Transformative context detected: Additional commentary or overlays represent Fair Use."
+                
         # Event logging for live analytics
         try:
             from app.services.firebase_service import db
@@ -69,9 +84,11 @@ async def detect(
                 'similarity': float(score),
                 'detectedAt': firestore.SERVER_TIMESTAMP,
                 'source': 'manual-scan',
-                'status': 'pending',
+                'status': 'safe' if is_fair_use else 'pending',
+                'category': category,
+                'reasoning': reasoning,
                 'location': 'User Upload / Manual Scan',
-                'threatLevel': 'Critical' if score > 0.95 else 'High' if score > 0.90 else 'Medium'
+                'threatLevel': 'Low (Fair Use)' if is_fair_use else ('Critical' if score > 0.95 else 'High')
             })
         except Exception as e:
             print(f"Failed to log detection event: {e}")
@@ -80,4 +97,15 @@ async def detect(
         match = False
         score = 0.0
         matched_url = None
-    return {"match": match, "similarity_score": score, "matched_image": matched_url}
+        category = None
+        reasoning = None
+        is_fair_use = False
+        
+    return {
+        "match": match, 
+        "similarity_score": score, 
+        "matched_image": matched_url,
+        "is_fair_use": is_fair_use,
+        "category": category,
+        "reasoning": reasoning
+    }
