@@ -1,3 +1,4 @@
+google-cloud-vision
 fastapi
 uvicorn[standard]
 torch
@@ -8,3 +9,4 @@ python-multipart
 pydantic
 Pillow
 numpy
+slowapi

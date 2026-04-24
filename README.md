@@ -47,6 +47,24 @@ The easiest way to see the magic and present it to Judges is through Docker:
 
 ---
 
+## 💻 Cloud Deployment (Google Cloud Run)
+To deploy the application securely for Hackathon submission:
+```bash
+# Build and Push backend Image
+gcloud builds submit --tag gcr.io/PROJECT_ID/fingerprint-api ./backend
+
+# Deploy to Cloud Run
+gcloud run deploy fingerprint-api \
+  --image gcr.io/PROJECT_ID/fingerprint-api \
+  --platform managed --allow-unauthenticated \
+  --set-env-vars FIREBASE_BUCKET=your-project.appspot.com
+
+# Deploy frontend (Assuming firebase tools are installed)
+cd frontend
+npm run build
+firebase deploy --only hosting
+```
+
 ## 🧠 How it Works
 
 1. **Embedding**: `app/models/embedding.py` runs the image through a pre-trained CNN, removing the classification head, yielding a pure semantic vector.

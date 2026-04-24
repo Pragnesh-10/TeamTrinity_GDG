@@ -1,16 +1,34 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const Analytics = () => {
   const [anomalies, setAnomalies] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulating real-time web crawler hits and propagation anomalies
-    const mockData = [
-      { id: 1, assetId: '98f2-4b1a', location: 'reddit.com/r/sports', timestamp: '2 mins ago', similarity: 98.5, threatLevel: 'High' },
-      { id: 2, assetId: '33a1-9c88', location: 'unknown-blog.ru', timestamp: '15 mins ago', similarity: 92.1, threatLevel: 'Critical' },
-      { id: 3, assetId: '11x9-p002', location: 'twitter.com/user99', timestamp: '1 hour ago', similarity: 88.0, threatLevel: 'Medium' }
-    ];
-    setAnomalies(mockData);
+    const fetchDetections = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/detections');
+        const apiData = response.data.map(d => ({
+          id: d.id,
+          assetId: d.assetId,
+          location: d.location || 'Unknown Network Node',
+          timestamp: d.detectedAt ? new Date(d.detectedAt).toLocaleString() : 'Just now',
+          similarity: (d.similarity * 100).toFixed(2),
+          threatLevel: d.threatLevel || 'Medium'
+        }));
+        setAnomalies(apiData);
+      } catch (error) {
+        console.error("Failed to load live tracking data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Polling mechanism since Firebase is handled strictly server-side for security
+    fetchDetections();
+    const interval = setInterval(fetchDetections, 15000); 
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -38,6 +56,7 @@ const Analytics = () => {
       <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
         <div className="bg-gray-50 border-b border-gray-200 px-6 py-3">
           <h3 className="font-bold text-gray-700">Live Propagation Feed</h3>
+        </div>
         <div className="bg-white px-6 py-3 border-b flex justify-between items-center text-gray-800">
              <span className="font-bold">Location</span>
              <span className="font-bold">Match Data</span>

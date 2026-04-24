@@ -7,7 +7,9 @@ import numpy as np
 class EmbeddingGenerator:
     def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model = models.mobilenet_v2(pretrained=True)
+        from torchvision.models import MobileNet_V2_Weights
+        # Avoid Deprecation Warning
+        self.model = models.mobilenet_v2(weights=MobileNet_V2_Weights.IMAGENET1K_V1)
         self.model.classifier = torch.nn.Sequential()  # remove classification head
         self.model = self.model.to(self.device)
         self.model.eval()

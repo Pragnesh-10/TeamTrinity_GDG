@@ -23,19 +23,22 @@ def upload_image(file_bytes, filename):
     blob.make_public()
     return blob.public_url
 
-def save_metadata(id, url, embedding):
+def save_metadata(id, url, embedding, user_id=None):
     doc_ref = db.collection('images').document(id)
     doc_ref.set({
         'url': url,
-        'embedding': embedding.tolist()
+        'owner_id': user_id # Access Control Reference (IDOR Fix)
     })
 
 def get_image_by_id(id):
     doc = db.collection('images').document(id).get()
     return doc.to_dict() if doc.exists else None
 
-def get_all_images():
-    docs = db.collection('images').stream()
+def get_user_images(user_id):
+    """
+    IDOR Fix: Replaces get_all_images(). Only queries firestore refs owned by the verified JWT session user
+    """
+    docs = db.collection('images').where('owner_id', '==', user_id).stream()
     return [{'id': doc.id, **doc.to_dict()} for doc in docs]
 
 def backup_faiss_index(index_path):
