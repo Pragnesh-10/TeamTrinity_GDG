@@ -19,7 +19,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS", 
-    f"{FRONTEND_URL},https://your-app.web.app"
+    f"{FRONTEND_URL},https://team-trinity-gdg.vercel.app/"
 ).split(",")
 
 app.add_middleware(

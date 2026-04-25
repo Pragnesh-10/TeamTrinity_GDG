@@ -50,10 +50,26 @@ async def detect(
     embedding = generator.generate(contents)
     matches = faiss_service.search(embedding, k=3)
     
+    # PHASE 7: Google Cloud Vision API (Mock Integration for Label Detection)
+    # Use for: label detection. Example: “football”, “stadium”, etc.
+    vision_labels = ["football", "stadium", "sports", "athlete"]
+    
     threshold = 0.85
     if matches and matches[0][1] > threshold:
         match = True
         score = matches[0][1]
+        
+        # PHASE 5: Add score % and Tune threshold
+        similarity_pct = int(score * 100)
+        
+        # PHASE 8: Risk level logic
+        if similarity_pct >= 80:
+            risk_level = "HIGH"
+        elif similarity_pct >= 50:
+            risk_level = "MEDIUM"
+        else:
+            risk_level = "LOW"
+            
         matched_id = matches[0][0]
         matched_data = get_image_by_id(matched_id)
         
@@ -96,6 +112,8 @@ async def detect(
     else:
         match = False
         score = 0.0
+        similarity_pct = 0
+        risk_level = "LOW"
         matched_url = None
         category = None
         reasoning = None
@@ -103,7 +121,10 @@ async def detect(
         
     return {
         "match": match, 
-        "similarity_score": score, 
+        "similarity_score": score,
+        "similarity_pct": similarity_pct,
+        "risk_level": risk_level,
+        "vision_labels": vision_labels,
         "matched_image": matched_url,
         "is_fair_use": is_fair_use,
         "category": category,

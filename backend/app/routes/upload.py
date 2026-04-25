@@ -35,7 +35,7 @@ async def upload(
 ):
     # Security Check #6: Validate/Sanitize Inputs
     if not file.content_type.startswith('image/'):
-        raise HTTPException(status_code=400, detail="Security Error: File must be an image type")
+        raise HTTPException(status_code=400, detail="Security Error: File must be an image type (png, jpeg, jpg, etc.)")
         
     contents = await file.read()
     
@@ -43,9 +43,19 @@ async def upload(
         raise HTTPException(status_code=413, detail="Security Error: File exceeds the 10MB limit")
         
     asset_id = str(uuid.uuid4())
-    filename = f"{current_user['uid']}/{asset_id}.jpg" # IDOR Fix: Store file directly inside User's sandbox segment
     
-    url = upload_image(contents, filename)
+    # Determine the file extension based on the uploaded content type
+    file_ext = "jpg" # Default
+    if file.content_type == "image/png":
+        file_ext = "png"
+    elif file.content_type == "image/webp":
+        file_ext = "webp"
+    elif file.content_type in ["image/jpeg", "image/jpg"]:
+        file_ext = "jpg"
+        
+    filename = f"{current_user['uid']}/{asset_id}.{file_ext}" # IDOR Fix: Store file directly inside User's sandbox segment
+    
+    url = upload_image(contents, filename, content_type=file.content_type)
     embedding = generator.generate(contents)
     labels = get_google_labels(contents)
     

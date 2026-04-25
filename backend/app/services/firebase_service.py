@@ -17,9 +17,9 @@ firebase_admin.initialize_app(cred, {
 db = firestore.client()
 bucket = storage.bucket()
 
-def upload_image(file_bytes, filename):
+def upload_image(file_bytes, filename, content_type='image/jpeg'):
     blob = bucket.blob(filename)
-    blob.upload_from_string(file_bytes, content_type='image/jpeg')
+    blob.upload_from_string(file_bytes, content_type=content_type)
     blob.make_public()
     return blob.public_url
 
