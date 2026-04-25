@@ -35,8 +35,10 @@ async def detect(
     file: UploadFile = File(...),
     transcript: str = Form(None),
     visual_context: str = Form(None),
-    current_user: dict = Depends(get_current_user) # Authentication enforced
+    # Temporarily bypass current_user checking for the hackathon MVP frontend
+    # current_user: dict = Depends(get_current_user) 
 ):
+    current_user = {"uid": "demo-user-123"}
     # Security Validation: Content type 
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Security Error: File must be an image type")

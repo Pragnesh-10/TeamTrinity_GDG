@@ -24,10 +24,10 @@ ALLOWED_ORIGINS = os.getenv(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"], # Relaxed for Hackathon MVP
     allow_credentials=True,
-    allow_methods=["*"],  # Restoring generic methods to prevent CORS preflight blocks during hackathon
-    allow_headers=["*"], # Restoring headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(upload.router, prefix="/api", tags=["upload"])
