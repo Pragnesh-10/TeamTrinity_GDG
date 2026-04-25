@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const Analytics = () => {
   const [anomalies, setAnomalies] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDetections = async () => {
