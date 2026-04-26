@@ -127,6 +127,7 @@ const Detect = () => {
                 value={visualContext}
                 onChange={(e) => setVisualContext(e.target.value)}
               ></textarea>
+            </div>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wide flex justify-between">
                 <span>2c. Detection Strictness (Confidence Threshold)</span>
