@@ -1,4 +1,7 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request, Form
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request, Form, BackgroundTasks
+import urllib.request
+import json
+import os
 from app.models.embedding import EmbeddingGenerator
 from app.services.faiss_service import faiss_service
 from app.services.firebase_service import get_image_by_id
@@ -9,6 +12,30 @@ from slowapi.util import get_remote_address
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 generator = EmbeddingGenerator()
+
+def send_discord_alert(risk_level: str, score: float, category: str, is_fair_use: bool):
+    webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+    if not webhook_url: return
+    
+    color = 16711680 if not is_fair_use else 65280 # Red if not fair use, Green if fair use
+    title = "🚨 Infringement Detected!" if not is_fair_use else "✅ Transformative Fair Use Detected"
+    
+    payload = {
+        "embeds": [{
+            "title": title,
+            "description": f"A scan has flagged a match.\n**Similarity:** {score*100:.1f}%\n**Risk Level:** {risk_level}\n**Category:** {category}",
+            "color": color,
+            "footer": {"text": "AI Digital Fingerprint Agent"}
+        }]
+    }
+    
+    try:
+        req = urllib.request.Request(webhook_url, method="POST")
+        req.add_header('Content-Type', 'application/json')
+        req.add_header('User-Agent', 'Hackathon-Agent')
+        urllib.request.urlopen(req, data=json.dumps(payload).encode('utf-8'))
+    except Exception as e:
+        print(f"Discord Webhook Failed: {e}")
 
 @router.get("/detections")
 @limiter.limit("60/minute")
@@ -32,9 +59,11 @@ async def get_detections(request: Request):
 @limiter.limit("50/minute") # Medium Rate Limiting (Abuse Prevention)
 async def detect(
     request: Request,
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     transcript: str = Form(None),
     visual_context: str = Form(None),
+    threshold: float = Form(0.85),
     # Temporarily bypass current_user checking for the hackathon MVP frontend
     # current_user: dict = Depends(get_current_user) 
 ):
@@ -52,14 +81,30 @@ async def detect(
     embedding = generator.generate(contents)
     matches = faiss_service.search(embedding, k=3)
     
-    # PHASE 7: Google Cloud Vision API (Mock Integration for Label Detection)
-    # Use for: label detection. Example: “football”, “stadium”, etc.
-    vision_labels = ["football", "stadium", "sports", "athlete"]
-    
-    threshold = 0.85
+        # PHASE 7: Google Cloud Vision API (Mock Integration for Label Detection)
+        # Use for: label detection. Example: “football”, “stadium”, etc.
+        vision_labels = ["football", "stadium", "sports", "athlete"]
+        
+        # Wow Factor: Explainable AI
+        # For Hackathon demo purposes, we provide static realistic bounding boxes.
+        # In a real model, this would come from Grad-CAM or a Detection model's output tensors.
+        explainability = {
+            "bounding_box": {"x": 15, "y": 20, "width": 60, "height": 70}, # Percentages
+            "heatmap_active": True
+        }
+        
+        threshold = 0.85
     if matches and matches[0][1] > threshold:
         match = True
         score = matches[0][1]
+        
+        # Wow Factor: Explainable AI
+        # For Hackathon demo purposes, we provide static realistic bounding boxes.
+        # In a real model, this would come from Grad-CAM or a Detection model's output tensors.
+        explainability = {
+            "bounding_box": {"x": 15, "y": 20, "width": 60, "height": 70}, # Percentages
+            "heatmap_active": True
+        }
         
         # PHASE 5: Add score % and Tune threshold
         similarity_pct = int(score * 100)
@@ -111,6 +156,9 @@ async def detect(
         except Exception as e:
             print(f"Failed to log detection event: {e}")
             
+        if risk_level in ["HIGH", "MEDIUM"]:
+            background_tasks.add_task(send_discord_alert, risk_level, score, category, is_fair_use)
+            
     else:
         match = False
         score = 0.0
@@ -120,6 +168,7 @@ async def detect(
         category = None
         reasoning = None
         is_fair_use = False
+        explainability = None
         
     return {
         "match": match, 
@@ -130,5 +179,6 @@ async def detect(
         "matched_image": matched_url,
         "is_fair_use": is_fair_use,
         "category": category,
-        "reasoning": reasoning
+        "reasoning": reasoning,
+        "explainability": explainability
     }

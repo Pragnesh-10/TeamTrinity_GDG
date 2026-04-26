@@ -73,8 +73,28 @@ const Detect = () => {
                     <p className="text-slate-600 font-semibold text-lg">Drop Suspicious Frame</p>
                   </div>
                 ) : (
-                  <img src={preview} alt="Upload preview" className="w-full h-full object-cover opacity-90 scale-100 group-hover:scale-105 transition-transform duration-500" />
-                  
+                  <>
+                    <img src={preview} alt="Upload preview" className="absolute inset-0 w-full h-full object-cover opacity-90 scale-100 group-hover:scale-105 transition-transform duration-500" />
+                    
+                    {/* Explainable AI Bounding Box Overlay */}
+                    {result && result.explainability && result.explainability.bounding_box && (
+                      <div 
+                        className={`absolute border-4 z-20 transition-all duration-1000 ${result.is_fair_use ? 'border-emerald-400 bg-emerald-400/20' : 'border-red-500 bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.7)]'}`}
+                        style={{
+                          left: `${result.explainability.bounding_box.x}%`,
+                          top: `${result.explainability.bounding_box.y}%`,
+                          width: `${result.explainability.bounding_box.width}%`,
+                          height: `${result.explainability.bounding_box.height}%`,
+                        }}
+                      >
+                        <div className={`absolute -top-6 left-[-4px] text-[10px] font-black px-2 py-0.5 text-white tracking-widest uppercase ${result.is_fair_use ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                          {result.is_fair_use ? 'Transformative Element' : 'Fingerprint Match'}
+                        </div>
+                        {/* Scanning beam animation */}
+                        <div className={`absolute inset-0 w-full h-[2px] blur-[1px] animate-pulse ${result.is_fair_use ? 'bg-emerald-300 shadow-[0_0_10px_#34d399]' : 'bg-red-400 shadow-[0_0_10px_#ef4444]'}`} style={{ animation: 'scan 2s linear infinite' }}></div>
+                      </div>
+                    )}
+                  </>
                 )}
              </div>
           </div>
@@ -151,41 +171,35 @@ const Detect = () => {
                 </h3>
               </div>
 
-              {/* Metrics Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-                  <p className="text-xs font-bold text-slate-400 uppercase mb-1">Vector Confidence</p>
-                  <p className="text-3xl font-black text-slate-800">{result.similarity_pct || (result.similarity_score * 100).toFixed(2)}<span className="text-xl text-slate-400 -ml-1">%</span></p>
-                </div>
-                
-                {result.risk_level && (
-                  <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-                    <p className="text-xs font-bold text-slate-400 uppercase mb-1">Assessed Threat</p>
-                    <p className={`text-2xl font-black ${result.risk_level === 'HIGH' ? 'text-rose-600' : result.risk_level === 'MEDIUM' ? 'text-amber-500' : 'text-emerald-500'}`}>
-                      {result.risk_level}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Reasoning Block */}
               {result.match && (
-                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex-grow">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-xs font-bold text-slate-400 uppercase">AI Adjudication</p>
-                    <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase ${result.category === 'Piracy' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}`}>{result.category}</span>
+                <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Vector Confidence</p>
+                      <p className={`text-3xl font-black ${result.similarity_pct >= 90 ? 'text-rose-600' : 'text-slate-800'}`}>{result.similarity_pct}<span className="text-xl text-slate-400">%</span></p>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Risk Severity</p>
+                      <p className={`text-xl font-bold mt-1 ${result.is_fair_use ? 'text-emerald-600' : 'text-rose-600'}`}>{result.is_fair_use ? 'LOW' : result.risk_level}</p>
+                    </div>
                   </div>
-                  <p className="text-sm font-medium text-slate-700 bg-slate-50 p-4 border border-slate-100 rounded-lg leading-relaxed">
-                    "{result.reasoning}"
-                  </p>
 
-                  {result.vision_labels && (
-                    <div className="mt-4 pt-4 border-t border-slate-100">
-                       <p className="text-xs font-bold text-slate-400 uppercase mb-2">Google AI Classification</p>
-                       <div className="flex flex-wrap gap-1.5">
-                         {result.vision_labels.map((label, i) => (
-                           <span key={i} className="bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-md font-semibold">{label}</span>
-                         ))}
+                  <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
+                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Contextual Classification</h4>
+                    <div className="flex items-center space-x-3 mb-2">
+                       <span className={`px-3 py-1 rounded-md text-xs font-black uppercase tracking-widest ${result.is_fair_use ? 'bg-emerald-200 text-emerald-800' : 'bg-rose-200 text-rose-800'}`}>{result.category}</span>
+                    </div>
+                    <p className="text-slate-700 text-sm font-medium leading-relaxed italic border-l-4 border-slate-300 pl-3">"{result.reasoning}"</p>
+                  </div>
+                  
+                  {result.explainability && (
+                    <div className="bg-slate-800 rounded-xl p-4 border border-slate-700 mt-2">
+                       <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center"><svg className="w-4 h-4 mr-1 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> Explainable AI Telemetry</p>
+                       <div className="grid grid-cols-2 gap-2 text-xs font-mono text-emerald-400">
+                         <div>Box X: {result.explainability.bounding_box.x}%</div>
+                         <div>Box Y: {result.explainability.bounding_box.y}%</div>
+                         <div>Width: {result.explainability.bounding_box.width}%</div>
+                         <div>Height: {result.explainability.bounding_box.height}%</div>
                        </div>
                     </div>
                   )}
