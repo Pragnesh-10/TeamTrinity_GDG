@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { LiquidButton } from './ui/liquid-glass-button.tsx';
 
 const PHashGrid = ({ hashHex }) => {
   if (!hashHex) return null;
@@ -97,13 +98,15 @@ const Upload = () => {
           )}
         </div>
 
-        <button 
+        <LiquidButton 
           type="submit" 
           disabled={loading || !file}
-          className={`w-full py-4 rounded-xl text-white font-bold text-lg transition-all flex items-center justify-center space-x-2 
+          variant="default"
+          size="xxl"
+          className={`w-full py-4 text-white font-bold text-lg 
             ${loading || !file 
-              ? 'bg-slate-300 cursor-not-allowed shadow-none' 
-              : 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 shadow-lg hover:shadow-indigo-500/30 transform hover:-translate-y-1'
+              ? 'opacity-50 cursor-not-allowed' 
+              : ''
             }`}
         >
           {loading ? (
@@ -115,12 +118,12 @@ const Upload = () => {
               <span>Encoding Neural Features...</span>
             </>
           ) : (
-            <>
+            <div className="flex gap-2 isolate relative z-20">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
               <span>Seal & Register Fingerprint</span>
-            </>
+            </div>
           )}
-        </button>
+        </LiquidButton>
       </form>
       
       {result && (
