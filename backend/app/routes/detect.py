@@ -81,26 +81,14 @@ async def detect(
     embedding = generator.generate(contents)
     matches = faiss_service.search(embedding, k=3)
     
-        # PHASE 7: Google Cloud Vision API (Mock Integration for Label Detection)
-        # Use for: label detection. Example: “football”, “stadium”, etc.
-        vision_labels = ["football", "stadium", "sports", "athlete"]
-        
-        # Wow Factor: Explainable AI
-        # For Hackathon demo purposes, we provide static realistic bounding boxes.
-        # In a real model, this would come from Grad-CAM or a Detection model's output tensors.
-        explainability = {
-            "bounding_box": {"x": 15, "y": 20, "width": 60, "height": 70}, # Percentages
-            "heatmap_active": True
-        }
-        
-        threshold = 0.85
+    # PHASE 7: Google Cloud Vision API (Mock Integration for Label Detection)
+    vision_labels = ["football", "stadium", "sports", "athlete"]
+    
     if matches and matches[0][1] > threshold:
         match = True
         score = matches[0][1]
         
         # Wow Factor: Explainable AI
-        # For Hackathon demo purposes, we provide static realistic bounding boxes.
-        # In a real model, this would come from Grad-CAM or a Detection model's output tensors.
         explainability = {
             "bounding_box": {"x": 15, "y": 20, "width": 60, "height": 70}, # Percentages
             "heatmap_active": True

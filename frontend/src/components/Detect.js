@@ -6,6 +6,7 @@ const Detect = () => {
   const [preview, setPreview] = useState(null);
   const [transcript, setTranscript] = useState("");
   const [visualContext, setVisualContext] = useState("");
+  const [threshold, setThreshold] = useState(0.85);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dmcaGenerated, setDmcaGenerated] = useState(false);
@@ -31,6 +32,7 @@ const Detect = () => {
     formData.append('file', file);
     if (transcript) formData.append('transcript', transcript);
     if (visualContext) formData.append('visual_context', visualContext);
+    formData.append('threshold', threshold);
     
     try {
       const response = await axios.post('http://localhost:8000/api/detect', formData);
@@ -125,11 +127,31 @@ const Detect = () => {
                 value={visualContext}
                 onChange={(e) => setVisualContext(e.target.value)}
               ></textarea>
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide flex justify-between">
+                <span>2c. Detection Strictness (Confidence Threshold)</span>
+                <span className="text-indigo-500 font-black">{Math.round(threshold * 100)}%</span>
+              </label>
+              <div className="mt-2 flex items-center space-x-4">
+                 <input 
+                   type="range" 
+                   min="0.5" 
+                   max="0.99" 
+                   step="0.01" 
+                   value={threshold}
+                   onChange={(e) => setThreshold(parseFloat(e.target.value))}
+                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                 />
+              </div>
+              <div className="flex justify-between text-[10px] text-slate-400 font-bold mt-1 uppercase">
+                 <span>Lenient (50%)</span>
+                 <span>Strict (99%)</span>
+              </div>
             </div>
           </div>
 
           <button 
-            type="submit" 
+            type="submit"  
             disabled={loading || !file}
             className={`w-full py-4 rounded-xl text-white font-bold text-lg transition-all flex items-center justify-center space-x-3 
               ${loading || !file ? 'bg-slate-300 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 shadow-xl shadow-rose-500/30 hover:-translate-y-1'}`}
