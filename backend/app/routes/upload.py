@@ -52,65 +52,73 @@ async def upload(
         
     asset_id = str(uuid.uuid4())
     
-    # Determine the file extension based on the uploaded content type
-    file_ext = "jpg" # Default
-    if file.content_type == "image/png":
-        file_ext = "png"
-    elif file.content_type == "image/webp":
-        file_ext = "webp"
-    elif file.content_type in ["image/jpeg", "image/jpg"]:
-        file_ext = "jpg"
+    try:
+        # Determine the file extension based on the uploaded content type
+        file_ext = "jpg" # Default
+        if file.content_type == "image/png":
+            file_ext = "png"
+        elif file.content_type == "image/webp":
+            file_ext = "webp"
+        elif file.content_type in ["image/jpeg", "image/jpg"]:
+            file_ext = "jpg"
+            
+        filename = f"{current_user['uid']}/{asset_id}.png" # Must be PNG for lossless LSB Watermarking!
         
-    filename = f"{current_user['uid']}/{asset_id}.png" # Must be PNG for lossless LSB Watermarking!
-    
-    # 1. Hashing (SHA-256 for exact match)
-    sha256_hash = hashlib.sha256(contents).hexdigest()
-    
-    # 2. Perceptual Hashing (pHash for resilient match)
-    img_pil = Image.open(io.BytesIO(contents)).convert('RGB')
-    phash = str(imagehash.phash(img_pil))
-    
-    # 3. LSB Invisible Watermarking
-    # Encode the asset_id as a hidden watermark in the image pixels
-    watermark_msg = f"SportShield_Verified_{asset_id}".encode('utf-8')
-    watermarked_pil = stepic.encode(img_pil, watermark_msg)
-    
-    watermarked_io = io.BytesIO()
-    # Save as PNG to prevent compression artifacts destroying the watermark
-    watermarked_pil.save(watermarked_io, format='PNG')
-    watermarked_bytes = watermarked_io.getvalue()
-    
-    # Upload the watermarked version
-    url = upload_image(watermarked_bytes, filename, content_type="image/png")
-    
-    # Generate 1280-dimension Deep embedding from the original image structure
-    embedding = generator.generate(contents)
-    labels = get_google_labels(contents)
-    
-    # Statefully store the vector in FAISS index (Backs up to Firebase)
-    faiss_service.add(embedding, asset_id)
-    
-    # Save the reference map with Hashing Metadata
-    from app.services.firebase_service import db
-    from firebase_admin import firestore
-    doc_ref = db.collection('images').document(asset_id)
-    doc_ref.set({
-        'url': url,
-        'labels': labels,
-        'owner_id': current_user['uid'],
-        'sha256': sha256_hash,
-        'phash': phash,
-        'watermark_id': f"SportShield_Verified_{asset_id}",
-        'timestamp': firestore.SERVER_TIMESTAMP
-    })
-    
-    return {
-        "id": asset_id, 
-        "url": url, 
-        "labels": labels,
-        "metadata": {
-            "sha256": sha256_hash,
-            "phash": phash,
-            "watermark_id": f"SportShield_Verified_{asset_id}"
+        # 1. Hashing (SHA-256 for exact match)
+        sha256_hash = hashlib.sha256(contents).hexdigest()
+        
+        # 2. Perceptual Hashing (pHash for resilient match)
+        img_pil = Image.open(io.BytesIO(contents)).convert('RGB')
+        phash = str(imagehash.phash(img_pil))
+        
+        # 3. LSB Invisible Watermarking
+        # Encode the asset_id as a hidden watermark in the image pixels
+        watermark_msg = f"SportShield_Verified_{asset_id}".encode('utf-8')
+        watermarked_pil = stepic.encode(img_pil, watermark_msg)
+        
+        watermarked_io = io.BytesIO()
+        # Save as PNG to prevent compression artifacts destroying the watermark
+        watermarked_pil.save(watermarked_io, format='PNG')
+        watermarked_bytes = watermarked_io.getvalue()
+        
+        # Upload the watermarked version
+        url = upload_image(watermarked_bytes, filename, content_type="image/png")
+        
+        # Generate 1280-dimension Deep embedding from the original image structure
+        embedding = generator.generate(contents)
+        try:
+            labels = get_google_labels(contents)
+        except Exception as e:
+            print(f"Google Vision API Error: {e}")
+            labels = ["Google AI Error"]
+        
+        # Statefully store the vector in FAISS index (Backs up to Firebase)
+        faiss_service.add(embedding, asset_id)
+        
+        # Save the reference map with Hashing Metadata
+        from app.services.firebase_service import db
+        from firebase_admin import firestore
+        doc_ref = db.collection('images').document(asset_id)
+        doc_ref.set({
+            'url': url,
+            'labels': labels,
+            'owner_id': current_user['uid'],
+            'sha256': sha256_hash,
+            'phash': phash,
+            'watermark_id': f"SportShield_Verified_{asset_id}",
+            'timestamp': firestore.SERVER_TIMESTAMP
+        })
+        
+        return {
+            "id": asset_id, 
+            "url": url, 
+            "labels": labels,
+            "metadata": {
+                "sha256": sha256_hash,
+                "phash": phash,
+                "watermark_id": f"SportShield_Verified_{asset_id}"
+            }
         }
-    }
+    except Exception as e:
+        print(f"Upload processing error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")

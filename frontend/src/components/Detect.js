@@ -35,7 +35,8 @@ const Detect = () => {
     formData.append('threshold', threshold);
     
     try {
-      const response = await axios.post('http://localhost:8000/api/detect', formData);
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await axios.post(`${API_URL}/api/detect`, formData);
       setResult(response.data);
     } catch (error) {
       console.error(error);

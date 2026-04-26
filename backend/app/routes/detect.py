@@ -78,107 +78,111 @@ async def detect(
     if len(contents) > 10 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="Security Error: File exceeds the 10MB limit")
         
-    embedding = generator.generate(contents)
-    matches = faiss_service.search(embedding, k=3)
-    
-    # PHASE 7: Google Cloud Vision API (Mock Integration for Label Detection)
-    vision_labels = ["football", "stadium", "sports", "athlete"]
-    
-    if matches and matches[0][1] > threshold:
-        match = True
-        score = matches[0][1]
+    try:
+        embedding = generator.generate(contents)
+        matches = faiss_service.search(embedding, k=3)
         
-        # Wow Factor: Explainable AI
-        explainability = {
-            "bounding_box": {"x": 15, "y": 20, "width": 60, "height": 70}, # Percentages
-            "heatmap_active": True
-        }
+        # PHASE 7: Google Cloud Vision API (Mock Integration for Label Detection)
+        vision_labels = ["football", "stadium", "sports", "athlete"]
         
-        # PHASE 5: Add score % and Tune threshold
-        similarity_pct = int(score * 100)
-        
-        # PHASE 8: Risk level logic
-        if similarity_pct >= 80:
-            risk_level = "HIGH"
-        elif similarity_pct >= 50:
-            risk_level = "MEDIUM"
-        else:
-            risk_level = "LOW"
+        if matches and matches[0][1] > threshold:
+            match = True
+            score = matches[0][1]
             
-        matched_id = matches[0][0]
-        matched_data = get_image_by_id(matched_id)
-        
-        # IDOR Check (Optional depending on business logic): Does the user own the match they triggered?
-        # A global detector normally wouldn't need this, but if users only search their own DB subset, it would.
-        # Below permits the detector to find any match, fulfilling the IP Tracking requirements.
-        matched_url = matched_data['url'] if matched_data else None
-        
-        # Unbiased Agent Context Analysis
-        category = "Piracy"
-        reasoning = "No transformative elements found. 1:1 raw feed upload."
-        is_fair_use = False
-        
-        # If context is provided, analyze for 'Fair Use' transformation
-        if transcript or visual_context:
-            context_string = f"{transcript or ''} {visual_context or ''}".lower()
-            if any(term in context_string for term in ["analysis", "tactics", "breakdown", "overlay", "commentary", "educational", "review"]):
-                category = "Fair Use"
-                is_fair_use = True
-                reasoning = "Transformative context detected: Additional commentary or overlays represent Fair Use."
-                
-        # Event logging for live analytics
-        try:
-            from app.services.firebase_service import db
-            from firebase_admin import firestore
-            
-            # Gemini-Style Artificial Context Analysis
-            gemini_analysis = {
-                "severity": "low" if is_fair_use else ("high" if similarity_pct > 90 else "medium"),
-                "platform_type": "Social Media / Web",
-                "recommended_action": "Monitor/Dismiss" if is_fair_use else "File DMCA Takedown",
-                "summary": reasoning
+            # Wow Factor: Explainable AI
+            explainability = {
+                "bounding_box": {"x": 15, "y": 20, "width": 60, "height": 70}, # Percentages
+                "heatmap_active": True
             }
             
-            db.collection('detections').add({
-                'assetId': matched_id,
-                'similarity': float(score),
-                'detectedAt': firestore.SERVER_TIMESTAMP,
-                'source': 'manual-scan',
-                'status': 'safe' if is_fair_use else 'pending',
-                'category': category,
-                'reasoning': reasoning,
-                'gemini_analysis': gemini_analysis,
-                'location': 'User Upload / Manual Scan',
-                'threatLevel': 'Low (Fair Use)' if is_fair_use else ('Critical' if score > 0.95 else 'High')
-            })
-        except Exception as e:
-            print(f"Failed to log detection event: {e}")
+            # PHASE 5: Add score % and Tune threshold
+            similarity_pct = int(score * 100)
             
-        if risk_level in ["HIGH", "MEDIUM"]:
-            background_tasks.add_task(send_discord_alert, risk_level, score, category, is_fair_use)
+            # PHASE 8: Risk level logic
+            if similarity_pct >= 80:
+                risk_level = "HIGH"
+            elif similarity_pct >= 50:
+                risk_level = "MEDIUM"
+            else:
+                risk_level = "LOW"
+                
+            matched_id = matches[0][0]
+            matched_data = get_image_by_id(matched_id)
             
-    else:
-        match = False
-        score = 0.0
-        similarity_pct = 0
-        risk_level = "LOW"
-        matched_url = None
-        category = None
-        reasoning = None
-        is_fair_use = False
-        explainability = None
-        gemini_analysis = None
-        
-    return {
-        "match": match, 
-        "similarity_score": score,
-        "similarity_pct": similarity_pct,
-        "risk_level": risk_level,
-        "vision_labels": vision_labels,
-        "matched_image": matched_url,
-        "is_fair_use": is_fair_use,
-        "category": category,
-        "reasoning": reasoning,
-        "explainability": explainability,
-        "gemini_analysis": gemini_analysis
-    }
+            # IDOR Check (Optional depending on business logic): Does the user own the match they triggered?
+            # A global detector normally wouldn't need this, but if users only search their own DB subset, it would.
+            # Below permits the detector to find any match, fulfilling the IP Tracking requirements.
+            matched_url = matched_data['url'] if matched_data else None
+            
+            # Unbiased Agent Context Analysis
+            category = "Piracy"
+            reasoning = "No transformative elements found. 1:1 raw feed upload."
+            is_fair_use = False
+            
+            # If context is provided, analyze for 'Fair Use' transformation
+            if transcript or visual_context:
+                context_string = f"{transcript or ''} {visual_context or ''}".lower()
+                if any(term in context_string for term in ["analysis", "tactics", "breakdown", "overlay", "commentary", "educational", "review"]):
+                    category = "Fair Use"
+                    is_fair_use = True
+                    reasoning = "Transformative context detected: Additional commentary or overlays represent Fair Use."
+                    
+            # Event logging for live analytics
+            try:
+                from app.services.firebase_service import db
+                from firebase_admin import firestore
+                
+                # Gemini-Style Artificial Context Analysis
+                gemini_analysis = {
+                    "severity": "low" if is_fair_use else ("high" if similarity_pct > 90 else "medium"),
+                    "platform_type": "Social Media / Web",
+                    "recommended_action": "Monitor/Dismiss" if is_fair_use else "File DMCA Takedown",
+                    "summary": reasoning
+                }
+                
+                db.collection('detections').add({
+                    'assetId': matched_id,
+                    'similarity': float(score),
+                    'detectedAt': firestore.SERVER_TIMESTAMP,
+                    'source': 'manual-scan',
+                    'status': 'safe' if is_fair_use else 'pending',
+                    'category': category,
+                    'reasoning': reasoning,
+                    'gemini_analysis': gemini_analysis,
+                    'location': 'User Upload / Manual Scan',
+                    'threatLevel': 'Low (Fair Use)' if is_fair_use else ('Critical' if score > 0.95 else 'High')
+                })
+            except Exception as e:
+                print(f"Failed to log detection event: {e}")
+                
+            if risk_level in ["HIGH", "MEDIUM"]:
+                background_tasks.add_task(send_discord_alert, risk_level, score, category, is_fair_use)
+                
+        else:
+            match = False
+            score = 0.0
+            similarity_pct = 0
+            risk_level = "LOW"
+            matched_url = None
+            category = None
+            reasoning = None
+            is_fair_use = False
+            explainability = None
+            gemini_analysis = None
+            
+        return {
+            "match": match, 
+            "similarity_score": score,
+            "similarity_pct": similarity_pct,
+            "risk_level": risk_level,
+            "vision_labels": vision_labels,
+            "matched_image": matched_url,
+            "is_fair_use": is_fair_use,
+            "category": category,
+            "reasoning": reasoning,
+            "explainability": explainability,
+            "gemini_analysis": gemini_analysis
+        }
+    except Exception as e:
+        print(f"Detection processing error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")

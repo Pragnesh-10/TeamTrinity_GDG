@@ -47,7 +47,8 @@ const Upload = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await axios.post('http://localhost:8000/api/upload', formData);
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await axios.post(`${API_URL}/api/upload`, formData);
       setResult(response.data);
       // Optional: setFile(null) to clear, but keeping it lets user see what they uploaded
     } catch (error) {
