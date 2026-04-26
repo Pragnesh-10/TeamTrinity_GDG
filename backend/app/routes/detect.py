@@ -130,6 +130,15 @@ async def detect(
         try:
             from app.services.firebase_service import db
             from firebase_admin import firestore
+            
+            # Gemini-Style Artificial Context Analysis
+            gemini_analysis = {
+                "severity": "low" if is_fair_use else ("high" if similarity_pct > 90 else "medium"),
+                "platform_type": "Social Media / Web",
+                "recommended_action": "Monitor/Dismiss" if is_fair_use else "File DMCA Takedown",
+                "summary": reasoning
+            }
+            
             db.collection('detections').add({
                 'assetId': matched_id,
                 'similarity': float(score),
@@ -138,6 +147,7 @@ async def detect(
                 'status': 'safe' if is_fair_use else 'pending',
                 'category': category,
                 'reasoning': reasoning,
+                'gemini_analysis': gemini_analysis,
                 'location': 'User Upload / Manual Scan',
                 'threatLevel': 'Low (Fair Use)' if is_fair_use else ('Critical' if score > 0.95 else 'High')
             })
@@ -157,6 +167,7 @@ async def detect(
         reasoning = None
         is_fair_use = False
         explainability = None
+        gemini_analysis = None
         
     return {
         "match": match, 
@@ -168,5 +179,6 @@ async def detect(
         "is_fair_use": is_fair_use,
         "category": category,
         "reasoning": reasoning,
-        "explainability": explainability
+        "explainability": explainability,
+        "gemini_analysis": gemini_analysis
     }

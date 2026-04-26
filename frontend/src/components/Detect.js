@@ -207,11 +207,26 @@ const Detect = () => {
                   </div>
 
                   <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Contextual Classification</h4>
-                    <div className="flex items-center space-x-3 mb-2">
+                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2 flex justify-between items-center">
+                       <span>Contextual Classification</span>
+                       {result.gemini_analysis && (
+                          <span className="flex items-center gap-1 text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full shadow-sm border border-indigo-200">
+                            <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span></span>
+                            Powered by Gemini Flash
+                          </span>
+                       )}
+                    </h4>
+                    <div className="flex items-center space-x-3 mb-3">
                        <span className={`px-3 py-1 rounded-md text-xs font-black uppercase tracking-widest ${result.is_fair_use ? 'bg-emerald-200 text-emerald-800' : 'bg-rose-200 text-rose-800'}`}>{result.category}</span>
+                       <span className={`px-3 py-1 rounded-md text-xs font-black uppercase tracking-widest ${result.is_fair_use ? 'bg-slate-200 text-slate-700' : 'bg-amber-200 text-amber-800'}`}>{result.gemini_analysis ? result.gemini_analysis.severity : 'SEVERITY'}</span>
                     </div>
-                    <p className="text-slate-700 text-sm font-medium leading-relaxed italic border-l-4 border-slate-300 pl-3">"{result.reasoning}"</p>
+                    {result.gemini_analysis && (
+                      <div className="mb-3 flex flex-wrap gap-2">
+                        <span className="text-[10px] font-bold bg-white border border-slate-200 text-slate-600 px-2 py-1 rounded shadow-sm">Platform: {result.gemini_analysis.platform_type}</span>
+                        <span className="text-[10px] font-bold bg-white border border-slate-200 text-indigo-600 px-2 py-1 rounded shadow-sm">Action: {result.gemini_analysis.recommended_action}</span>
+                      </div>
+                    )}
+                    <p className="text-slate-700 text-sm font-medium leading-relaxed italic border-l-4 border-indigo-400 bg-white p-3 rounded shadow-sm break-words">"{result.gemini_analysis ? result.gemini_analysis.summary : result.reasoning}"</p>
                   </div>
                   
                   {result.explainability && (

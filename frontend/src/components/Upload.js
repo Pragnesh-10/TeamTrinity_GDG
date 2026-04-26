@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const PHashGrid = ({ hashHex }) => {
+  if (!hashHex) return null;
+  // Convert hex to binary for visual grid
+  let binStr = "";
+  for (let i = 0; i < hashHex.length; i++) {
+    const bin = parseInt(hashHex[i], 16).toString(2).padStart(4, '0');
+    if(bin !== "NaN") binStr += bin;
+  }
+  // Ensure it's 64 bits
+  binStr = binStr.padEnd(64, '0').slice(0, 64);
+  
+  return (
+    <div className="grid grid-cols-8 gap-0.5 w-16 h-16 shrink-0 border border-slate-200 bg-slate-200 shadow-inner p-0.5 rounded-sm">
+      {binStr.split('').map((bit, idx) => (
+        <div key={idx} className={bit === '1' ? 'bg-slate-900 rounded-sm' : 'bg-white rounded-sm'} />
+      ))}
+    </div>
+  );
+};
+
 const Upload = () => {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -134,9 +154,13 @@ const Upload = () => {
                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between"><span>SHA-256 Hash <span className="text-emerald-500 lowercase">(Exact Match)</span></span></p>
                          <p className="text-xs text-slate-700 font-mono break-all leading-tight">{result.metadata.sha256}</p>
                      </div>
-                     <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between"><span>Perceptual Hash <span className="text-emerald-500 lowercase">(Resilient Match)</span></span></p>
-                         <p className="text-xs text-slate-700 font-mono break-all leading-tight">{result.metadata.phash}</p>
+                     <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex gap-4 items-center">
+                         <div className="flex-1">
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between"><span>Perceptual Hash <span className="text-emerald-500 lowercase">(Resilient Match)</span></span></p>
+                             <p className="text-xs text-slate-700 font-mono break-all leading-tight">{result.metadata.phash}</p>
+                         </div>
+                         {/* Visual Fingerprint Wow-Factor */}
+                         <PHashGrid hashHex={result.metadata.phash} />
                      </div>
                      <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-inner bg-emerald-50/30">
                          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1 flex items-center gap-1"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Default Watermark ID (LSB Encoded)</p>
