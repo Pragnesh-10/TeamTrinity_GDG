@@ -11,7 +11,7 @@ const BAR_GRADIENT = ['#6366f1', '#8b5cf6'];
 
 /* ─────────────── Sub-components ─────────────── */
 const StatCard = ({ title, value, icon, accent, pulse }) => (
-  <div className={`relative overflow-hidden rounded-3xl p-8 border shadow-sm hover:shadow-lg transition-shadow bg-white ${accent}`}>
+  <div className={`relative overflow-hidden rounded-3xl p-8 border border-[#2d3449] shadow-sm hover:shadow-lg transition-shadow bg-[#171f33] ${accent}`}>
     <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full blur-2xl opacity-30" style={{ background: 'currentColor' }} />
     <div className="flex items-center gap-3 mb-2 relative z-10">
       {pulse && (
@@ -23,14 +23,14 @@ const StatCard = ({ title, value, icon, accent, pulse }) => (
       <div className="text-xl">{icon}</div>
       <p className="text-xs font-bold uppercase tracking-widest text-slate-500">{title}</p>
     </div>
-    <p className="text-4xl font-black text-slate-900 relative z-10">{value}</p>
+    <p className="text-4xl font-black text-white relative z-10">{value}</p>
   </div>
 );
 
 const SectionHeader = ({ title, subtitle, badge }) => (
   <div className="flex items-center justify-between mb-5">
     <div>
-      <h3 className="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+      <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
         {title}
         {badge && (
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-bold border border-indigo-200 uppercase tracking-wide">
@@ -133,13 +133,13 @@ const Analytics = () => {
     <div className="max-w-7xl mx-auto font-sans space-y-10">
 
       {/* ── Page Header ── */}
-      <div className="pb-6 border-b border-slate-200">
+      <div className="pb-6 border-b border-[#2d3449]">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-4xl font-extrabold text-white tracking-tight">
               Real-Time Propagation Analytics
             </h2>
-            <p className="text-slate-500 mt-2 text-base leading-relaxed max-w-2xl">
+            <p className="text-[#c7c4d7] mt-2 text-base leading-relaxed max-w-2xl">
               Live tracking of unauthorized distributions and fair-use classifications detected by
               automated FAISS vector scrapers, visualized directly from the platform database.
             </p>
@@ -159,17 +159,17 @@ const Analytics = () => {
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Assets Vaulted" value="1,204"   icon="🗄️" accent="border-slate-200" />
-        <StatCard title="Active Anomalies"      value={anomalies.length} icon="📡" accent="border-rose-200 bg-rose-50" pulse />
-        <StatCard title="Piracy Strikes"        value={piracyCount}  icon="⚠️" accent="border-orange-200 bg-orange-50" />
-        <StatCard title="Fair Use Saved"         value={fairUseCount} icon="✅" accent="border-emerald-200 bg-emerald-50" />
+        <StatCard title="Total Assets Vaulted" value="1,204"   icon="🗄️" accent="border-[#464554]" />
+        <StatCard title="Active Anomalies"      value={anomalies.length} icon="📡" accent="border-rose-500/50" pulse />
+        <StatCard title="Piracy Strikes"        value={piracyCount}  icon="⚠️" accent="border-orange-500/50" />
+        <StatCard title="Fair Use Saved"         value={fairUseCount} icon="✅" accent="border-emerald-500/50" />
       </div>
 
       {/* ── Charts Row ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
         {/* Pie Chart — Piracy vs Fair Use (mirrors Streamlit plotly pie) */}
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+        <div className="bg-[#171f33] rounded-3xl border border-[#2d3449] shadow-sm p-8">
           <SectionHeader
             title="Categorization Breakdown"
             subtitle="Piracy vs Fair Use — powered by Supabase analytics pipeline"
@@ -200,8 +200,9 @@ const Analytics = () => {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: 13 }}
+                  contentStyle={{ borderRadius: 12, border: '1px solid #2d3449', backgroundColor: '#222a3d', color: '#dae2fd', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', fontSize: 13 }}
                   formatter={(val, name) => [`${val} cases`, name]}
+                  itemStyle={{ color: '#dae2fd' }}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 13, fontWeight: 600 }} />
               </PieChart>
@@ -214,7 +215,7 @@ const Analytics = () => {
         </div>
 
         {/* Bar Chart — Vector Similarity Distribution */}
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+        <div className="bg-[#171f33] rounded-3xl border border-[#2d3449] shadow-sm p-8">
           <SectionHeader
             title="Vector Similarity Distribution"
             subtitle="FAISS cosine match confidence buckets across all detections"
@@ -233,12 +234,13 @@ const Analytics = () => {
                     <stop offset="100%" stopColor={BAR_GRADIENT[1]} stopOpacity={0.7} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="range" tick={{ fontSize: 11, fontWeight: 600, fill: '#94a3b8' }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2d3449" />
+                <XAxis dataKey="range" tick={{ fontSize: 11, fontWeight: 600, fill: '#c7c4d7' }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#c7c4d7' }} />
                 <Tooltip
-                  contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: 13 }}
+                  contentStyle={{ borderRadius: 12, border: '1px solid #2d3449', backgroundColor: '#222a3d', color: '#dae2fd', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', fontSize: 13 }}
                   formatter={(val) => [`${val} detections`, 'Count']}
+                  itemStyle={{ color: '#dae2fd' }}
                 />
                 <Bar dataKey="count" fill="url(#barGrad)" radius={[6, 6, 0, 0]} />
               </BarChart>
@@ -252,7 +254,7 @@ const Analytics = () => {
 
       {/* Area Chart — Detection Timeline */}
       {timelineData.length > 1 && (
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+        <div className="bg-[#171f33] rounded-3xl border border-[#2d3449] shadow-sm p-8">
           <SectionHeader
             title="Detection Activity Timeline"
             subtitle="Hourly propagation events captured by the vector scraper network"
@@ -266,12 +268,13 @@ const Analytics = () => {
                   <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="time" tick={{ fontSize: 11, fill: '#94a3b8' }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#94a3b8' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2d3449" />
+              <XAxis dataKey="time" tick={{ fontSize: 11, fill: '#c7c4d7' }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#c7c4d7' }} />
               <Tooltip
-                contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 13 }}
+                contentStyle={{ borderRadius: 12, border: '1px solid #2d3449', backgroundColor: '#222a3d', color: '#dae2fd', fontSize: 13 }}
                 formatter={(val) => [`${val}`, 'Detections']}
+                itemStyle={{ color: '#dae2fd' }}
               />
               <Area type="monotone" dataKey="detections" stroke="#6366f1" strokeWidth={2} fill="url(#areaGrad)" />
             </AreaChart>
@@ -280,9 +283,9 @@ const Analytics = () => {
       )}
 
       {/* ── Live Propagation Feed ── */}
-      <div className="bg-white shadow-xl shadow-slate-200/40 rounded-3xl border border-slate-100 overflow-hidden">
-        <div className="bg-slate-50/80 border-b border-slate-100 px-8 py-5 flex items-center justify-between">
-          <h3 className="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+      <div className="bg-[#171f33] shadow-xl shadow-slate-900/40 rounded-3xl border border-[#2d3449] overflow-hidden">
+        <div className="bg-[#131b2e] border-b border-[#2d3449] px-8 py-5 flex items-center justify-between">
+          <h3 className="font-extrabold text-white text-lg flex items-center gap-2">
             <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
@@ -308,11 +311,11 @@ const Analytics = () => {
             <p className="text-xs text-slate-400 mt-1">Run a scan in the Manual Scanner tab to populate this feed.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[#2d3449]">
             {anomalies.map((anom) => (
               <div
                 key={anom.id}
-                className="p-8 flex flex-col md:flex-row md:items-center justify-between hover:bg-slate-50/80 transition-colors bg-white group"
+                className="p-8 flex flex-col md:flex-row md:items-center justify-between hover:bg-[#222a3d] transition-colors bg-[#171f33] group"
               >
                 <div className="flex items-start md:items-center space-x-6 mb-4 md:mb-0">
                   <div className={`p-4 rounded-2xl shrink-0 transition-transform group-hover:scale-105 shadow-sm ${anom.isFairUse ? 'bg-emerald-100 text-emerald-600' : (anom.threatLevel === 'Critical' ? 'bg-rose-100 text-rose-600' : 'bg-orange-100 text-orange-600')}`}>
@@ -327,31 +330,31 @@ const Analytics = () => {
                     )}
                   </div>
                   <div>
-                    <p className="font-extrabold text-slate-900 text-lg flex items-center gap-3 flex-wrap">
+                    <p className="font-extrabold text-white text-lg flex items-center gap-3 flex-wrap">
                       {anom.location}
-                      <span className={`text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider font-black shadow-sm ${anom.isFairUse ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}`}>
+                      <span className={`text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider font-black shadow-sm ${anom.isFairUse ? 'bg-emerald-900 text-emerald-300 border border-emerald-700' : 'bg-rose-900 text-rose-300 border border-rose-700'}`}>
                         {anom.category}
                       </span>
                     </p>
-                    <p className="text-sm text-slate-500 font-medium mt-1">
+                    <p className="text-sm text-slate-400 font-medium mt-1">
                       Asset Vault Ref:&nbsp;
-                      <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">{anom.assetId}</span>
+                      <span className="font-mono text-xs bg-[#2d3449] px-1.5 py-0.5 rounded text-[#dae2fd] border border-[#464554]">{anom.assetId}</span>
                       <span className="mx-2">•</span>
-                      Detected: <span className="text-slate-600">{anom.timestamp}</span>
+                      Detected: <span className="text-[#c7c4d7]">{anom.timestamp}</span>
                     </p>
                     {anom.reasoning && (
-                      <p className="text-sm text-slate-500 mt-2 bg-slate-50 p-2 rounded border border-slate-100 truncate md:max-w-2xl">
+                      <p className="text-sm text-[#c7c4d7] mt-2 bg-[#131b2e] p-2 rounded border border-[#2d3449] truncate md:max-w-2xl">
                         "{anom.reasoning}"
                       </p>
                     )}
                   </div>
                 </div>
-                <div className="text-left md:text-right ml-[4.5rem] md:ml-0 md:pl-6 border-l-0 md:border-l border-slate-100 md:shrink-0">
-                  <p className="font-black text-slate-800 text-2xl">
+                <div className="text-left md:text-right ml-[4.5rem] md:ml-0 md:pl-6 border-l-0 md:border-l border-[#2d3449] md:shrink-0">
+                  <p className="font-black text-white text-2xl">
                     {anom.similarity}<span className="text-lg text-slate-400">%</span>
                   </p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 mt-1">Vector Match</p>
-                  <button className={`text-sm font-bold transition-all px-4 py-2 rounded-lg border flex items-center gap-2 group/btn ${anom.isFairUse ? 'text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100' : 'text-rose-700 bg-rose-50 border-rose-200 hover:bg-rose-100 hover:text-rose-900'}`}>
+                  <button className={`text-sm font-bold transition-all px-4 py-2 rounded-lg border flex items-center gap-2 group/btn ${anom.isFairUse ? 'text-emerald-300 bg-emerald-900/40 border-emerald-800 hover:bg-emerald-900/60' : 'text-rose-300 bg-rose-900/40 border-rose-800 hover:bg-rose-900/60 hover:text-white'}`}>
                     <span>Review Case</span>
                     <svg className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
