@@ -1,4 +1,3 @@
-google-cloud-vision
 fastapi
 uvicorn[standard]
 torch
@@ -13,3 +12,4 @@ slowapi
 imagehash
 stepic
 transformers
+google-cloud-vision

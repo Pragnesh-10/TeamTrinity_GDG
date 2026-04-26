@@ -16,13 +16,27 @@ router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 generator = EmbeddingGenerator()
 
-# ─── Free Zero-Cost Image Classification using Hugging Face CLIP ───────────────
-# CLIP (Contrastive Language-Image Pretraining) by OpenAI, running 100% locally.
-# No API key, no billing, no quota. Runs on CPU in ~100ms per image.
+# ─── Google Cloud Vision API (primary — 1000 free calls/month) ────────────────
+# Falls back to local CLIP automatically if credentials are missing.
+_vision_client = None
+
+def _get_vision_client():
+    """Lazy-load Vision API client. Returns None if credentials not configured."""
+    global _vision_client
+    if _vision_client is None:
+        try:
+            from google.cloud import vision
+            _vision_client = vision.ImageAnnotatorClient()
+            print("✅ Google Cloud Vision API client initialized.")
+        except Exception as e:
+            print(f"⚠️  Vision API unavailable: {e} — will use CLIP fallback.")
+            _vision_client = "unavailable"
+    return None if _vision_client == "unavailable" else _vision_client
+
+# ─── HuggingFace CLIP (free fallback — runs locally, zero cost) ───────────────
 _clip_pipeline = None
 
 def _get_clip_pipeline():
-    """Lazy-load CLIP pipeline once on first use."""
     global _clip_pipeline
     if _clip_pipeline is None:
         try:
@@ -30,15 +44,14 @@ def _get_clip_pipeline():
             _clip_pipeline = pipeline(
                 "zero-shot-image-classification",
                 model="openai/clip-vit-base-patch32",
-                device=-1  # CPU (no CUDA needed)
+                device=-1
             )
-            print("✅ CLIP zero-shot classifier loaded successfully (free, local, no billing).")
+            print("✅ CLIP fallback classifier loaded.")
         except Exception as e:
-            print(f"⚠️  CLIP load failed: {e} — will use fallback labels.")
+            print(f"⚠️  CLIP load failed: {e}")
             _clip_pipeline = None
     return _clip_pipeline
 
-# Sports & media context labels CLIP will classify against
 CLIP_CANDIDATE_LABELS = [
     "football", "basketball", "soccer", "tennis", "cricket", "rugby",
     "stadium", "sports arena", "athlete", "referee", "sports broadcast",
@@ -47,23 +60,35 @@ CLIP_CANDIDATE_LABELS = [
 
 def get_image_labels(image_bytes: bytes) -> list:
     """
-    Returns top-5 sports-context labels for the image using CLIP.
-    Falls back to generic tags if CLIP is unavailable.
-    Completely free — runs locally on CPU.
+    Returns top-5 sports-context labels.
+    Priority: Google Cloud Vision API → CLIP (free local fallback).
     """
+    # Try Google Cloud Vision first (1000 free calls/month)
+    client = _get_vision_client()
+    if client:
+        try:
+            from google.cloud import vision
+            image = vision.Image(content=image_bytes)
+            response = client.label_detection(image=image)
+            labels = [l.description for l in response.label_annotations][:5]
+            if labels:
+                print(f"Vision API labels: {labels}")
+                return labels
+        except Exception as e:
+            print(f"Vision API call failed: {e} — falling back to CLIP.")
+
+    # Free CLIP fallback
     pipe = _get_clip_pipeline()
     if pipe is None:
         return ["sports", "media", "broadcast", "athlete", "stadium"]
-
     try:
-        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        # CLIP zero-shot classification against our sports taxonomy
+        from PIL import Image as PILImage
+        import io
+        img = PILImage.open(io.BytesIO(image_bytes)).convert("RGB")
         results = pipe(img, candidate_labels=CLIP_CANDIDATE_LABELS)
-        # Return top 5 labels with score > 2% confidence
-        top_labels = [r["label"] for r in results if r["score"] > 0.02][:5]
-        return top_labels if top_labels else ["sports", "media"]
+        return [r["label"] for r in results if r["score"] > 0.02][:5] or ["sports", "media"]
     except Exception as e:
-        print(f"CLIP classification error: {e}")
+        print(f"CLIP fallback error: {e}")
         return ["sports", "media", "broadcast", "athlete", "stadium"]
 
 
