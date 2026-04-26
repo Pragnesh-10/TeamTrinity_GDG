@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from app.routes import upload, detect, images
+from app.routes import upload, detect, images, decode
 from app.core.security import generate_api_key, get_current_user
 import os
 
@@ -34,6 +34,7 @@ app.add_middleware(
 app.include_router(upload.router, prefix="/api", tags=["upload"])
 app.include_router(detect.router, prefix="/api", tags=["detect"])
 app.include_router(images.router, prefix="/api", tags=["images"])
+app.include_router(decode.router, prefix="/api", tags=["decode"])
 
 @app.post("/api/keys/generate")
 # For a real app, protect this with get_current_user!
