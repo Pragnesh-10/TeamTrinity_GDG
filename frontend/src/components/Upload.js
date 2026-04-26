@@ -109,27 +109,48 @@ const Upload = () => {
             <div className="bg-emerald-100 p-2 rounded-full">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <h3 className="font-extrabold text-xl">Asset Successfully Embedded</h3>
+            <h3 className="font-extrabold text-xl">Asset Successfully Embedded 🔐</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            <div className="md:col-span-2">
-              <img src={result.url} className="w-full h-auto object-cover rounded-lg shadow-sm border border-slate-200" alt="Vault asset" />
-            </div>
-            <div className="md:col-span-3 space-y-4">
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Global Vault ID (Vector)</p>
-                <div className="text-sm bg-white p-3 rounded-lg border border-slate-200 text-slate-700 font-mono break-all shadow-inner">
-                  {result.id}
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="relative group cursor-pointer">
+                 <img src={result.url} className="w-full h-48 object-cover rounded-lg shadow-sm border border-emerald-200 group-hover:opacity-80 transition-opacity" alt="Vault asset" />
+                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">
+                     <p className="bg-slate-900/80 text-white font-bold px-3 py-2 rounded text-sm flex items-center gap-2"><svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> Contains Invisible LSB Watermark</p>
+                 </div>
               </div>
               
+              <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-bold shadow-md transition-colors flex items-center justify-center gap-2" onClick={() => alert("Certificate downloaded. In a real app, this generates a PDF.")}>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                  Download Proof of Ownership 📜
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {result.metadata && (
+                  <>
+                     <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between"><span>SHA-256 Hash <span className="text-emerald-500 lowercase">(Exact Match)</span></span></p>
+                         <p className="text-xs text-slate-700 font-mono break-all leading-tight">{result.metadata.sha256}</p>
+                     </div>
+                     <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between"><span>Perceptual Hash <span className="text-emerald-500 lowercase">(Resilient Match)</span></span></p>
+                         <p className="text-xs text-slate-700 font-mono break-all leading-tight">{result.metadata.phash}</p>
+                     </div>
+                     <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-inner bg-emerald-50/30">
+                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1 flex items-center gap-1"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Default Watermark ID (LSB Encoded)</p>
+                         <p className="text-xs text-emerald-800 font-mono font-bold leading-tight">{result.metadata.watermark_id}</p>
+                     </div>
+                  </>
+              )}
+              
+              {/* Optional Labels */}
               {result.labels && result.labels.length > 0 && (
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Google Vision Classification</p>
-                  <div className="flex flex-wrap gap-2">
-                    {result.labels.map((lbl, idx) => (
-                      <span key={idx} className="bg-emerald-100 text-emerald-800 text-xs px-3 py-1.5 rounded-full font-semibold">
+                <div className="pt-2">
+                  <div className="flex flex-wrap gap-1.5">
+                    {result.labels.slice(0, 3).map((lbl, idx) => (
+                      <span key={idx} className="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded font-bold uppercase">
                         {lbl}
                       </span>
                     ))}
