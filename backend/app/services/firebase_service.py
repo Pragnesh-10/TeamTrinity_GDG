@@ -1,21 +1,42 @@
-import firebase_admin
-from firebase_admin import credentials, storage, firestore
-import os
+# MOCK FIREBASE FOR LOCAL HACKATHON DEMO
+db = None
+bucket = None
 
-# Assume serviceAccountKey.json in backend folder
-cred_path = os.path.join(os.path.dirname(__file__), '..', '..', 'serviceAccountKey.json')
-if os.path.exists(cred_path):
-    cred = credentials.Certificate(cred_path)
-else:
-    # For deployment, use env
-    cred = credentials.ApplicationDefault()
+def upload_image(file_bytes, filename, content_type='image/jpeg'):
+    return f"http://localhost:8000/static/uploads/{filename}"
 
-firebase_admin.initialize_app(cred, {
-    'storageBucket': os.getenv('FIREBASE_BUCKET', 'your-project.appspot.com')
-})
+def save_metadata(id, url, embedding, user_id=None):
+    pass
 
-db = firestore.client()
-bucket = storage.bucket()
+def get_image_by_id(id):
+    return {'url': f"http://localhost:8000/static/uploads/demo-user-123/{id}.png"}
+
+def get_user_images(user_id):
+    return []
+
+def backup_faiss_index(index_path):
+    pass
+
+def restore_faiss_index(index_path):
+    return False
+
+# --- ORIGINAL CODE COMMENTED OUT ---
+# import firebase_admin
+# from firebase_admin import credentials, storage, firestore
+# import os
+# 
+# cred_path = os.path.join(os.path.dirname(__file__), '..', '..', 'serviceAccountKey.json')
+# if os.path.exists(cred_path):
+#     cred = credentials.Certificate(cred_path)
+# else:
+#     cred = credentials.ApplicationDefault()
+# 
+# firebase_admin.initialize_app(cred, {
+#     'storageBucket': os.getenv('FIREBASE_BUCKET', 'your-project.appspot.com')
+# })
+# 
+# db = firestore.client()
+# bucket = storage.bucket()
 
 def upload_image(file_bytes, filename, content_type='image/jpeg'):
     blob = bucket.blob(filename)

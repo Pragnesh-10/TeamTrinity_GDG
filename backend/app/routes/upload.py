@@ -11,6 +11,7 @@ import imagehash
 from PIL import Image
 import io
 import stepic
+import os
 
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
@@ -133,8 +134,11 @@ async def upload(
         watermarked_pil.save(watermarked_io, format='PNG')
         watermarked_bytes = watermarked_io.getvalue()
 
-        # 4. Upload watermarked image to Firebase Storage
-        url = upload_image(watermarked_bytes, filename, content_type="image/png")
+        os.makedirs(f"static/uploads/{current_user['uid']}", exist_ok=True)
+        local_path = f"static/uploads/{filename}"
+        with open(local_path, "wb") as f:
+            f.write(watermarked_bytes)
+        url = f"http://localhost:8000/{local_path}"
 
         # 5. Generate 1280-dim FAISS vector embedding
         embedding = generator.generate(contents)
@@ -145,18 +149,18 @@ async def upload(
         # 7. Add embedding to FAISS vector index (auto-persists to Firebase)
         faiss_service.add(embedding, asset_id)
 
-        # 8. Store metadata in Firestore
-        from app.services.firebase_service import db
-        from firebase_admin import firestore
-        db.collection('images').document(asset_id).set({
-            'url': url,
-            'labels': labels,
-            'owner_id': current_user['uid'],
-            'sha256': sha256_hash,
-            'phash': phash,
-            'watermark_id': f"SportShield_Verified_{asset_id}",
-            'timestamp': firestore.SERVER_TIMESTAMP
-        })
+        # 8. Store metadata in Firestore - skipped for local MVP
+        # from app.services.firebase_service import db
+        # from firebase_admin import firestore
+        # db.collection('images').document(asset_id).set({
+        #     'url': url,
+        #     'labels': labels,
+        #     'owner_id': current_user['uid'],
+        #     'sha256': sha256_hash,
+        #     'phash': phash,
+        #     'watermark_id': f"SportShield_Verified_{asset_id}",
+        #     'timestamp': firestore.SERVER_TIMESTAMP
+        # })
 
         return {
             "id": asset_id,
