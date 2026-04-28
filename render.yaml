@@ -6,8 +6,8 @@ services:
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: API_BASE_URL
-        value: https://sportshield-api.onrender.com # Change if you rename the service or attach a custom domain
+        value: https://teamtrinity-gdg-1.onrender.com # Change if you rename the service or attach a custom domain
       - key: FRONTEND_URL
-        value: https://your-vercel-app-url.vercel.app # Update this with your actual Vercel URL
+        value: https://team-trinity-gdg.vercel.app # Update this with your actual Vercel URL
       - key: PORT
         value: "8000"
