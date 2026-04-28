@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../lib/api';
 
 const Decode = () => {
   const [file, setFile] = useState(null);
@@ -23,8 +24,7 @@ const Decode = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      const response = await axios.post(`${API_URL}/api/decode`, formData);
+      const response = await axios.post(apiUrl('/api/decode'), formData);
       setResult(response.data);
     } catch (error) {
       const detail = error.response?.data?.detail || 'Decode failed. Image may not contain a SportShield watermark.';

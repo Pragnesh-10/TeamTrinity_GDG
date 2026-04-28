@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../lib/api';
 
 const Images = () => {
   const [images, setImages] = useState([]);
@@ -8,8 +9,7 @@ const Images = () => {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-        const response = await axios.get(`${API_URL}/api/images`);
+        const response = await axios.get(apiUrl('/api/images'));
         setImages(response.data);
       } catch (error) {
         console.error('Failed to load vault:', error);

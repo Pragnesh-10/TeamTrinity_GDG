@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { LiquidButton } from './ui/liquid-glass-button.tsx';
+import { apiUrl } from '../lib/api';
 
 const PHashGrid = ({ hashHex }) => {
   if (!hashHex) return null;
@@ -47,8 +48,7 @@ const Upload = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      const response = await axios.post(`${API_URL}/api/upload`, formData);
+      const response = await axios.post(apiUrl('/api/upload'), formData);
       setResult(response.data);
       // Optional: setFile(null) to clear, but keeping it lets user see what they uploaded
     } catch (error) {

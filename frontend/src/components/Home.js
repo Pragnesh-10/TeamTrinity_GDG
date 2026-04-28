@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { apiUrl } from '../lib/api';
 
 const StatCard = ({ value, label, icon, color }) => (
   <div className={`bg-[#171f33] border ${color} rounded-2xl p-6 flex items-center gap-5 hover:scale-105 transition-transform duration-300`}>
@@ -32,14 +33,13 @@ const Home = () => {
   const [recentDetections, setRecentDetections] = useState([]);
 
   useEffect(() => {
-    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
     // Load health stats
-    axios.get(`${API_URL}/health`).then(r => {
+    axios.get(apiUrl('/health')).then(r => {
       setStats(s => ({ ...s, assets: r.data.index_size ?? '—' }));
     }).catch(() => {});
 
     // Load recent detections for the mini-feed
-    axios.get(`${API_URL}/api/detections`).then(r => {
+    axios.get(apiUrl('/api/detections')).then(r => {
       const data = r.data || [];
       const piracy = data.filter(d => d.status !== 'safe').length;
       const fairUse = data.filter(d => d.status === 'safe').length;

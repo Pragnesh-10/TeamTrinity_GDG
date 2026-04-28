@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../lib/api';
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area,
@@ -101,8 +102,7 @@ const Analytics = () => {
 
   const fetchDetections = useCallback(async () => {
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      const response = await axios.get(`${API_URL}/api/detections`);
+      const response = await axios.get(apiUrl('/api/detections'));
       const apiData = response.data.map(d => ({
         id:            d.id,
         assetId:       d.assetId,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../lib/api';
 
 const Detect = () => {
   const [file, setFile] = useState(null);
@@ -35,8 +36,7 @@ const Detect = () => {
     formData.append('threshold', threshold);
     
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      const response = await axios.post(`${API_URL}/api/detect`, formData);
+      const response = await axios.post(apiUrl('/api/detect'), formData);
       setResult(response.data);
     } catch (error) {
       console.error(error);
