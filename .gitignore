@@ -24,3 +24,4 @@ backend/app/services/__pycache__/
 backend/static/uploads/
 backend/faiss_index.pkl
 node_modules
+node_modules

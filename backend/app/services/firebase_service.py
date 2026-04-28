@@ -1,15 +1,19 @@
+import os
+
 # MOCK FIREBASE FOR LOCAL HACKATHON DEMO
 db = None
 bucket = None
 
+BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+
 def upload_image(file_bytes, filename, content_type='image/jpeg'):
-    return f"http://localhost:8000/static/uploads/{filename}"
+    return f"{BASE_URL}/static/uploads/{filename}"
 
 def save_metadata(id, url, embedding, user_id=None):
     pass
 
 def get_image_by_id(id):
-    return {'url': f"http://localhost:8000/static/uploads/demo-user-123/{id}.png"}
+    return {'url': f"{BASE_URL}/static/uploads/demo-user-123/{id}.png"}
 
 def get_user_images(user_id):
     return []

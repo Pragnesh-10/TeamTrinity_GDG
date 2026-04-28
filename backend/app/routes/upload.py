@@ -138,7 +138,9 @@ async def upload(
         local_path = f"static/uploads/{filename}"
         with open(local_path, "wb") as f:
             f.write(watermarked_bytes)
-        url = f"http://localhost:8000/{local_path}"
+            
+        base_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+        url = f"{base_url}/{local_path}"
 
         # 5. Generate 1280-dim FAISS vector embedding
         embedding = generator.generate(contents)

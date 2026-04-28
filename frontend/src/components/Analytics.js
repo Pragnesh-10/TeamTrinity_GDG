@@ -239,7 +239,7 @@ const Analytics = () => {
                 <XAxis dataKey="range" tick={{ fontSize: 11, fontWeight: 600, fill: '#c7c4d7' }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#c7c4d7' }} />
                 <Tooltip
-                  contentStyle={{ borderRadius: 12, border: '1px solid #2d3449', backgroundColor: '#222a3d', color: '#dae2fd', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', fontSize: 13 }}
+                  contentStyle={{ borderRadius: 12, border: '1px solid #2d3449', backgroundColor: '#222a3d', color: '#dae2fd', fontSize: 13 }}
                   formatter={(val) => [`${val} detections`, 'Count']}
                   itemStyle={{ color: '#dae2fd' }}
                 />
